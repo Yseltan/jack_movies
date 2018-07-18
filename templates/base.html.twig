@@ -13,7 +13,8 @@
     <link rel="shortcut icon" href="{{ asset('img/logo.ico') }}">
     <title>{% block title %} Home {% endblock %}</title>
 </head>
-<body>
+<body onload="randombg()">
+<div id="random" >
     {% if is_granted('ROLE_ADMIN') %}
         {% include('base/navbar_admin.html.twig') %}
     {% elseif is_granted('ROLE_USER')%}
@@ -55,11 +56,15 @@
         }
     </script>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 </div>
 
     {% block script %}  {% endblock %}
 
 >>>>>>> 8efa56879eb1f9f237b95a0888a7db79007ca966
+=======
+</div>
+>>>>>>> parent of 33b34c5... pagination
 </body>
 </html>

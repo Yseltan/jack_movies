@@ -7,7 +7,6 @@ use App\Entity\Category;
 use App\Entity\Movie;
 use App\Form\MovieType;
 use App\Form\RateMovieFormType;
-use App\Repository\MovieRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use App\Services\MovieService;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,13 +16,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 class MovieController extends Controller
 {
     /**
-     * @Route("/movies/{page}", name="movies")
+     * @Route("/movies", name="movies")
      */
-    public function movies(Request $request, $page = 1)
+    public function movies(Request $request)
     {
         $rep = $this->getDoctrine()->getRepository(Movie::class);
         $movies = $rep->findAll();
-        $entityManager = $this->getDoctrine()->getManager();
 
         //Form use for filter categories
         $formCategory = $this->createFormBuilder()
@@ -43,6 +41,7 @@ class MovieController extends Controller
             $selectedCategory = array_values($categories)[0];
             $id = $selectedCategory->getId();
 
+            $entityManager = $this->getDoctrine()->getManager();
             $query = $entityManager->getRepository("App\Entity\Movie")->createQueryBuilder('m')
                 ->innerjoin('m.categories', 'c')->addSelect('c')
                 ->where('c.id = :id')
@@ -55,25 +54,9 @@ class MovieController extends Controller
                 $movie->setPathPicture($pathImage);
             }
 
-            //pagination
-            /** @var MovieRepository $repository */
-            $repository = $this->getDoctrine()->getRepository(Movie::class);
-            $paginator =  $repository->paginate($query, $page);
-            $maxPages = ceil($paginator->count() / $limit);
-            $thisPage = $page;
-
-            foreach ($movies as $movie) {
-                $movie->getCategories();
-
-                $pathImage = $movie->getPicture();
-                $movie->setPathPicture($pathImage);
-            }
-
             return $this->render('movie/index.html.twig',[
-                'movies' => $paginator,
+                'movies' => $movies,
                 'formCategory' => $formCategory->createView(),
-                'maxPages' => $maxPages,
-                'thisPage' => $thisPage,
             ]);
         }
         foreach ($movies as $movie) {
@@ -81,19 +64,9 @@ class MovieController extends Controller
             $movie->setPathPicture($pathImage);
         }
 
-        //pagination
-        /** @var MovieRepository $repository */
-        $repository = $this->getDoctrine()->getRepository(Movie::class);
-        $paginator =  $repository->getAllPosts($page);
-        $limit = 5;
-        $maxPages = ceil($paginator->count() / $limit);
-        $thisPage = $page;
-
         return $this->render('movie/index.html.twig',[
-            'movies' => $paginator,
+            'movies' => $movies,
             'formCategory' => $formCategory->createView(),
-            'maxPages' => $maxPages,
-            'thisPage' => $thisPage,
             ]);
     }
 
